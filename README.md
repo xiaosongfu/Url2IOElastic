@@ -42,14 +42,14 @@ elasticCore.article();
 
 ---  
 
-**现对setExtraProcessor 和 addResultHandleThread 属性做详细说明**  
+**现对setExtraProcessor 和 addResultHandleThread 属性做详细说明：**  
 
-setExtraProcessor  
+①setExtraProcessor  
 >  
 通过自定义一个类，继承 BaseExtraProcessor ，并按需重载它的 processTitle(String title) 、 processContent(String content) 、 processDate(String date) 这3个方法来实现对爬取到的正文标题、正文内容和时间进行额外的处理，比如去掉一些多余的字符等等。  
 
 
-addResultHandleThread  
+②addResultHandleThread  
 >  
 通过自定义一个类，继承 BaseResultHandleThread ， BaseResultHandleThread  是一个继承自 Thread 的类，继承它就可用自动继承 一个 int 类型的 index 属性和一个 Url2IOResponse 类型的 data 对象，index 属性标识了 data 数据是哪一个 index 对应的数据， Url2IOResponse 类型是 url2io 服务器返回的 json 字符串对应的 model ，所有需要的数据都可用在里面找到。  
 代码内使用 ArrayList 来承载 BaseResultHandleThread 的 Class 类型，这意味着你可以添加多个 BaseResultHandleThread 的子类，他们的 run 方法都会被执行。例如你既可以将结果写入本地文件，还可以保存到数据库，还可以保存到第三方服务器，等等。
