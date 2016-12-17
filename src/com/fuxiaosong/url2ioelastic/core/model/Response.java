@@ -1,10 +1,11 @@
-package com.fuxiaosong.url2ioelastic;
+package com.fuxiaosong.url2ioelastic.core.model;
 
 /**
  * Response 服务器返回值的模型类
  *
  * @author fuxiaosong
- * @version 1.0.0 2016年11月10日 14:10:32
+ * @version 1.0.0
+ * @since 2016年12月17日
  */
 public class Response {
     /*
@@ -24,7 +25,6 @@ public class Response {
     private String msg;
     private String code;
     private String type;
-
 
     public String getTitle() {
         return title;

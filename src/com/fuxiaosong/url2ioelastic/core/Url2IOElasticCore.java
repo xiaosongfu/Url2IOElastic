@@ -1,5 +1,6 @@
-package com.fuxiaosong.url2ioelastic;
+package com.fuxiaosong.url2ioelastic.core;
 
+import com.fuxiaosong.url2ioelastic.core.model.Response;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -8,15 +9,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Url2IOBase 类
+ * Url2IOElasticCore 类
  *
  * @author fuxiaosong
- * @version 1.0.0 2016年11月10日 14:10:32
+ * @version 1.0.0
+ * @since 2016年12月17日
  */
-public final class Url2IOBase {
+public final class Url2IOElasticCore {
     //索引，标识当前爬取到了第几页
     private int mIndex = 1;
     //总共爬取多少页数据
@@ -29,10 +32,10 @@ public final class Url2IOBase {
     private Long mSleepTime = 2000L;
 
     //标题和正文内容的二次处理对象
-    private BaseProcess mBaseProcess = null;
+    private ElasticProcessor mElasticProcessor = null;
 
     //保存线程
-    private Class<? extends BaseThread> mClassName = null;
+    private ArrayList<Class<? extends ElasticThread>> mClassName = null;
 
     //保存各种错误信息
     private static HashMap<String , String> mErrorInfoMap = null;
@@ -64,20 +67,20 @@ public final class Url2IOBase {
      * @param beginUrl 基础url
      * @param sleepTime 爬取线程休眠的时间，单位毫秒
      */
-    public Url2IOBase(int index , int total , String token , String beginUrl, Long sleepTime , BaseProcess baseProcess , Class<? extends BaseThread> className) {
+    private Url2IOElasticCore(int index , int total , String token , String beginUrl, Long sleepTime , ElasticProcessor elasticProcessor, ArrayList<Class<? extends ElasticThread>> className) {
         this.mIndex = index;
         this.mTotal = total;
         this.mBaseUrl = "http://api.url2io.com/article?token="+token+"&fields=next,text&url=";
         this.mNextUrl = beginUrl;
         this.mSleepTime = sleepTime;
-        this.mBaseProcess = baseProcess;
+        this.mElasticProcessor = elasticProcessor;
         this.mClassName = className;
     }
 
     /**
      * 核心方法
      */
-    public void process() {
+    public void article() {
         //StringBuffer，用来承接服务器返回值
         StringBuffer sb = null;
         int i = 0;
@@ -148,9 +151,10 @@ public final class Url2IOBase {
             /*
              * 如果没有自定义处理类，就不用再处理了
              */
-            if(! ("BaseProcess".equals(mBaseProcess.getClass().getSimpleName()))) {
-                response.setTitle(mBaseProcess.processTitle(response.getTitle()));
-                response.setText(mBaseProcess.processContent(response.getText()));
+            if(! ("ElasticProcessor".equals(mElasticProcessor.getClass().getSimpleName()))) {
+                response.setTitle(mElasticProcessor.processTitle(response.getTitle()));
+                response.setText(mElasticProcessor.processContent(response.getText()));
+                response.setDate(mElasticProcessor.processDate(response.getDate()));
             }
 
             /*
@@ -160,15 +164,19 @@ public final class Url2IOBase {
             response.setText("");
 
             /*
-             * 启动线程进行自定义保存操作
+             * 启动线程进行自定义操作
              */
-            try {
-                BaseThread baseThread = mClassName.newInstance();
-                baseThread.fillData(response , mIndex);
-                baseThread.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
+            int size = mClassName.size();
+            if(size > 0) {
+                for (int j = 0; j < size; j++) {
+                    try {
+                        ElasticThread elasticThread = mClassName.get(j).newInstance();
+                        elasticThread.fillData(response, mIndex);
+                        elasticThread.start();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
             /*
@@ -182,7 +190,7 @@ public final class Url2IOBase {
             System.out.println("**************************************");
             System.out.println("***> 爬取第 " + mIndex + " 页");
             System.out.println("***> 标题： " + response.getTitle());
-            System.out.println("***> 开头几个字：" + response.getContent().substring(0, 20));
+            System.out.println("***> 正文开头几个字：" + response.getContent().substring(0, 20));
             System.out.println("**************************************");
             System.out.println("");
 
@@ -228,17 +236,17 @@ public final class Url2IOBase {
         //爬取线程休眠的时间，单位毫秒
         private Long mSleepTime = 2000L;
         //标题和正文内容的二次处理对象
-        private BaseProcess mBaseProcess = null;
+        private ElasticProcessor mElasticProcessor = null;
         //保存线程
-        private Class<? extends BaseThread> mClassName = null;
+        private ArrayList<Class<? extends ElasticThread>> mClassName = null;
 
         /**
          * 构造方法
-         * 需要在构造方法内实例化 mBaseProcess 对象
+         * 需要在构造方法内实例化 mElasticProcessor 对象
          */
         public Builder(){
-            mBaseProcess = new BaseProcess();
-            mClassName = BaseThread.class;
+            mElasticProcessor = new ElasticProcessor();
+            mClassName = new ArrayList<>();
         }
 
         /**
@@ -299,34 +307,34 @@ public final class Url2IOBase {
 
         /**
          * 如果需要对标题、正文内容进行二次处理则需要继承该类，
-         * 并按需重写 BaseProcess 的 processTitle(...) 或 processContent(...) 方法
+         * 并按需重写 ElasticProcessor 的 processTitle(...) 或 processContent(...) 方法
          *
-         * @param process 标题和正文内容的二次处理对象
+         * @param processor 标题和正文内容的二次处理对象
          * @return Builder实例
          */
-        public Builder process(BaseProcess process){
-            this.mBaseProcess = process;
+        public Builder processor(ElasticProcessor processor){
+            this.mElasticProcessor = processor;
             return this;
         }
 
         /**
-         *
+         * 添加自定义结果处理线程
          *
          * @param className
          * @return
          */
-        public Builder thread(Class<? extends BaseThread> className){
-            this.mClassName = className;
+        public Builder addThread(Class<? extends ElasticThread> className){
+            this.mClassName.add(className);
             return this;
         }
 
         /**
-         * build 方法，构造出 Url2IOBase 实例
+         * build 方法，构造出 Url2IOElasticCore 实例
          *
-         * @return Url2IOBase 实例
+         * @return Url2IOElasticCore 实例
          */
-        public Url2IOBase build(){
-            return new Url2IOBase(mIndex , mTotal , mToken, mNextUrl, mSleepTime, mBaseProcess, mClassName);
+        public Url2IOElasticCore build(){
+            return new Url2IOElasticCore(mIndex , mTotal , mToken, mNextUrl, mSleepTime, mElasticProcessor, mClassName);
         }
     }
 }

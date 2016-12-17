@@ -1,17 +1,17 @@
 package com.fuxiaosong.url2ioelastic.plugins;
 
-import com.fuxiaosong.url2ioelastic.BaseThread;
+import com.fuxiaosong.url2ioelastic.core.ElasticThread;
 import java.io.*;
 
 /**
  * 自定义结果保存线程示例类
- *
  * 将解析好的数据写入文件
  *
  * @author fuxiaosong
- * @version 1.0.0 2016年11月10日 14:10:32
+ * @version 1.0.0
+ * @since 2016年12月17日
  */
-public class WriteToFileThread extends BaseThread {
+public final class WriteToFileThread extends ElasticThread {
     //聚合大小，决定将多少个网页中爬取的正文内容保存在同一个文件里
     public int mTogether = 5;
     //文件名中的章节范围
@@ -24,14 +24,14 @@ public class WriteToFileThread extends BaseThread {
         /*
          * 写标题
          */
-        mWriterContentToFile.write("title.txt", response.getTitle() + "    " + response.getUrl() + "\n");
+        mWriterContentToFile.write("title.txt", data.getTitle() + "    " + data.getUrl() + "\n");
 
         /*
          * 写内容
          */
         int i = (index + mTogether - 1) / mTogether;
         mFileNameMid = ((i - 1) * mTogether +1) + "-" + (i * mTogether);
-        mWriterContentToFile.write("content_" + mFileNameMid + ".txt", "\n\r\n" + response.getTitle() + "\n" + response.getContent());
+        mWriterContentToFile.write("content_" + mFileNameMid + ".txt", "\n\r\n" + data.getTitle() + "\n" + data.getContent());
     }
 
     /**
