@@ -312,7 +312,7 @@ public final class Url2IOElasticCore {
          * @param processor 标题和正文内容的二次处理对象
          * @return Builder实例
          */
-        public Builder processor(BaseExtraProcessor processor){
+        public Builder setExtraProcessor(BaseExtraProcessor processor){
             this.mBaseExtraProcessor = processor;
             return this;
         }
@@ -323,7 +323,7 @@ public final class Url2IOElasticCore {
          * @param className
          * @return
          */
-        public Builder addThread(Class<? extends BaseResultHandleThread> className){
+        public Builder addResultHandleThread(Class<? extends BaseResultHandleThread> className){
             this.mClassName.add(className);
             return this;
         }
