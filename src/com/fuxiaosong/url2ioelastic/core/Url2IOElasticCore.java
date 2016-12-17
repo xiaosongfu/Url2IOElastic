@@ -1,6 +1,6 @@
 package com.fuxiaosong.url2ioelastic.core;
 
-import com.fuxiaosong.url2ioelastic.core.model.Response;
+import com.fuxiaosong.url2ioelastic.core.model.Url2IOResponse;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -32,10 +32,10 @@ public final class Url2IOElasticCore {
     private Long mSleepTime = 2000L;
 
     //标题和正文内容的二次处理对象
-    private ElasticProcessor mElasticProcessor = null;
+    private BaseExtraProcessor mBaseExtraProcessor = null;
 
     //保存线程
-    private ArrayList<Class<? extends ElasticThread>> mClassName = null;
+    private ArrayList<Class<? extends BaseResultHandleThread>> mClassName = null;
 
     //保存各种错误信息
     private static HashMap<String , String> mErrorInfoMap = null;
@@ -67,13 +67,13 @@ public final class Url2IOElasticCore {
      * @param beginUrl 基础url
      * @param sleepTime 爬取线程休眠的时间，单位毫秒
      */
-    private Url2IOElasticCore(int index , int total , String token , String beginUrl, Long sleepTime , ElasticProcessor elasticProcessor, ArrayList<Class<? extends ElasticThread>> className) {
+    private Url2IOElasticCore(int index , int total , String token , String beginUrl, Long sleepTime , BaseExtraProcessor baseExtraProcessor, ArrayList<Class<? extends BaseResultHandleThread>> className) {
         this.mIndex = index;
         this.mTotal = total;
         this.mBaseUrl = "http://api.url2io.com/article?token="+token+"&fields=next,text&url=";
         this.mNextUrl = beginUrl;
         this.mSleepTime = sleepTime;
-        this.mElasticProcessor = elasticProcessor;
+        this.mBaseExtraProcessor = baseExtraProcessor;
         this.mClassName = className;
     }
 
@@ -119,16 +119,16 @@ public final class Url2IOElasticCore {
             /*
              * 使用Gson解析服务器返回的数据为Response对象
              */
-            Response response = new Gson().fromJson(sb.toString(), Response.class);
+            Url2IOResponse url2IOResponse = new Gson().fromJson(sb.toString(), Url2IOResponse.class);
 
             /*
              * 看看是不是出问题了
              */
-            if(null != response.getMsg() && null != response.getError()){
+            if(null != url2IOResponse.getMsg() && null != url2IOResponse.getError()){
                 System.out.println("**************************************");
                 System.out.println("********** duang 出问题了 *************");
-                System.out.println("***> msg：" + response.getMsg());
-                System.out.println("***> error：" + mErrorInfoMap.get(response.getError()));
+                System.out.println("***> msg：" + url2IOResponse.getMsg());
+                System.out.println("***> error：" + mErrorInfoMap.get(url2IOResponse.getError()));
 
                 /*
                  * 发生 HTTPError 多半是在爬取网页的时候遇到了下一页连接是一个广告的情况，这时只需要重试即可
@@ -137,7 +137,7 @@ public final class Url2IOElasticCore {
                  *
                  * 如果是其他类型的错误，就没辙了
                  */
-                if(HTTP_ERROR.equals(response.getError())){
+                if(HTTP_ERROR.equals(url2IOResponse.getError())){
                     System.out.println("***> (可能试遇到广告了)开始重试... ***");
                     System.out.println("**************************************");
                     continue;
@@ -151,17 +151,17 @@ public final class Url2IOElasticCore {
             /*
              * 如果没有自定义处理类，就不用再处理了
              */
-            if(! ("ElasticProcessor".equals(mElasticProcessor.getClass().getSimpleName()))) {
-                response.setTitle(mElasticProcessor.processTitle(response.getTitle()));
-                response.setText(mElasticProcessor.processContent(response.getText()));
-                response.setDate(mElasticProcessor.processDate(response.getDate()));
+            if(! ("BaseExtraProcessor".equals(mBaseExtraProcessor.getClass().getSimpleName()))) {
+                url2IOResponse.setTitle(mBaseExtraProcessor.processTitle(url2IOResponse.getTitle()));
+                url2IOResponse.setText(mBaseExtraProcessor.processContent(url2IOResponse.getText()));
+                url2IOResponse.setDate(mBaseExtraProcessor.processDate(url2IOResponse.getDate()));
             }
 
             /*
              * 将Text的内容设置道Content中，并将Text设置为空字符串
              */
-            response.setContent(response.getText());
-            response.setText("");
+            url2IOResponse.setContent(url2IOResponse.getText());
+            url2IOResponse.setText("");
 
             /*
              * 启动线程进行自定义操作
@@ -170,9 +170,9 @@ public final class Url2IOElasticCore {
             if(size > 0) {
                 for (int j = 0; j < size; j++) {
                     try {
-                        ElasticThread elasticThread = mClassName.get(j).newInstance();
-                        elasticThread.fillData(response, mIndex);
-                        elasticThread.start();
+                        BaseResultHandleThread baseResultHandleThread = mClassName.get(j).newInstance();
+                        baseResultHandleThread.fillData(url2IOResponse, mIndex);
+                        baseResultHandleThread.start();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -182,15 +182,15 @@ public final class Url2IOElasticCore {
             /*
              * 保存下一页的url
              */
-            mNextUrl = response.getNext();
+            mNextUrl = url2IOResponse.getNext();
 
             /*
              * 打印信息
              */
             System.out.println("**************************************");
             System.out.println("***> 爬取第 " + mIndex + " 页");
-            System.out.println("***> 标题： " + response.getTitle());
-            System.out.println("***> 正文开头几个字：" + response.getContent().substring(0, 20));
+            System.out.println("***> 标题： " + url2IOResponse.getTitle());
+            System.out.println("***> 正文开头几个字：" + url2IOResponse.getContent().substring(0, 20));
             System.out.println("**************************************");
             System.out.println("");
 
@@ -236,16 +236,16 @@ public final class Url2IOElasticCore {
         //爬取线程休眠的时间，单位毫秒
         private Long mSleepTime = 2000L;
         //标题和正文内容的二次处理对象
-        private ElasticProcessor mElasticProcessor = null;
+        private BaseExtraProcessor mBaseExtraProcessor = null;
         //保存线程
-        private ArrayList<Class<? extends ElasticThread>> mClassName = null;
+        private ArrayList<Class<? extends BaseResultHandleThread>> mClassName = null;
 
         /**
          * 构造方法
-         * 需要在构造方法内实例化 mElasticProcessor 对象
+         * 需要在构造方法内实例化 mBaseExtraProcessor 对象
          */
         public Builder(){
-            mElasticProcessor = new ElasticProcessor();
+            mBaseExtraProcessor = new BaseExtraProcessor();
             mClassName = new ArrayList<>();
         }
 
@@ -307,13 +307,13 @@ public final class Url2IOElasticCore {
 
         /**
          * 如果需要对标题、正文内容进行二次处理则需要继承该类，
-         * 并按需重写 ElasticProcessor 的 processTitle(...) 或 processContent(...) 方法
+         * 并按需重写 BaseExtraProcessor 的 processTitle(...) 或 processContent(...) 方法
          *
          * @param processor 标题和正文内容的二次处理对象
          * @return Builder实例
          */
-        public Builder processor(ElasticProcessor processor){
-            this.mElasticProcessor = processor;
+        public Builder processor(BaseExtraProcessor processor){
+            this.mBaseExtraProcessor = processor;
             return this;
         }
 
@@ -323,7 +323,7 @@ public final class Url2IOElasticCore {
          * @param className
          * @return
          */
-        public Builder addThread(Class<? extends ElasticThread> className){
+        public Builder addThread(Class<? extends BaseResultHandleThread> className){
             this.mClassName.add(className);
             return this;
         }
@@ -334,7 +334,7 @@ public final class Url2IOElasticCore {
          * @return Url2IOElasticCore 实例
          */
         public Url2IOElasticCore build(){
-            return new Url2IOElasticCore(mIndex , mTotal , mToken, mNextUrl, mSleepTime, mElasticProcessor, mClassName);
+            return new Url2IOElasticCore(mIndex , mTotal , mToken, mNextUrl, mSleepTime, mBaseExtraProcessor, mClassName);
         }
     }
 }

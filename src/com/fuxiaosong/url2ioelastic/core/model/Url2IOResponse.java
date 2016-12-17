@@ -1,13 +1,13 @@
 package com.fuxiaosong.url2ioelastic.core.model;
 
 /**
- * Response 服务器返回值的模型类
+ * Url2IOResponse 服务器返回值的模型类
  *
  * @author fuxiaosong
  * @version 1.0.0
  * @since 2016年12月17日
  */
-public class Response {
+public class Url2IOResponse {
     /*
      * 请求成功
      */

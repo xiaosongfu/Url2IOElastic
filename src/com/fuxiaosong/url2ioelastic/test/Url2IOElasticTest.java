@@ -14,7 +14,7 @@ public class Url2IOElasticTest {
     public static void main(String[] args){
         // case 1
         //最简单的使用方法，所有属性均使用默认值 index 为1 total 为10 beginUrl 为 http://www.qiushibaike.com/
-        // sleep 为2000毫秒 Precess 为 ElasticProcessor ,什么也不做 结果保存方法线程为 ElasticThread ,同样什么也不做
+        // sleep 为2000毫秒 Precess 为 BaseExtraProcessor ,什么也不做 结果保存方法线程为 BaseResultHandleThread ,同样什么也不做
         new Url2IOElasticCore.Builder()
                 .token("4BNmeuIYRduW6S6p_J8hlw")
                 .build()

@@ -1,6 +1,7 @@
 package com.fuxiaosong.url2ioelastic.plugins;
 
-import com.fuxiaosong.url2ioelastic.core.ElasticThread;
+import com.fuxiaosong.url2ioelastic.core.BaseResultHandleThread;
+
 import java.io.*;
 
 /**
@@ -11,7 +12,7 @@ import java.io.*;
  * @version 1.0.0
  * @since 2016年12月17日
  */
-public final class WriteToFileThread extends ElasticThread {
+public final class WriteToFileThread extends BaseResultHandleThread {
     //聚合大小，决定将多少个网页中爬取的正文内容保存在同一个文件里
     public int mTogether = 5;
     //文件名中的章节范围

@@ -3,13 +3,13 @@ package com.fuxiaosong.url2ioelastic.core;
 /**
  * 对解析出的标题和正文内容进行二次处理
  * 如果需要对标题、正文内容进行二次处理则需要继承该类，
- * 并按需重写 ElasticProcessor 的 processTitle(...) 或 processContent(...) 方法
+ * 并按需重写 BaseExtraProcessor 的 processTitle(...) 或 processContent(...) 方法
  *
  * @author fuxiaosong
  * @version 1.0.0
  * @since 2016年12月17日
  */
-public class ElasticProcessor {
+public class BaseExtraProcessor {
     /**
      * 对解析出的标题进行二次处理
      *
