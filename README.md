@@ -55,6 +55,6 @@ elasticCore.article();
 代码内使用 ArrayList 来承载 BaseResultHandleThread 的 Class 类型，这意味着你可以添加多个 BaseResultHandleThread 的子类，他们的 run 方法都会被执行。例如你既可以将结果写入本地文件，还可以保存到数据库，还可以保存到第三方服务器，等等。
 
 ### #3 视频
-[传送门 >>>]()
+[传送门(待填坑) >>>]()
 ### #4 Over
 欢迎提 issue，提 PR。  
