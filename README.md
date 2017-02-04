@@ -54,7 +54,13 @@ elasticCore.article();
 通过自定义一个类，继承 BaseResultHandleThread ， BaseResultHandleThread  是一个继承自 Thread 的类，继承它就可用自动继承 一个 int 类型的 index 属性和一个 Url2IOResponse 类型的 data 对象，index 属性标识了 data 数据是哪一个 index 对应的数据， Url2IOResponse 类型是 url2io 服务器返回的 json 字符串对应的 model ，所有需要的数据都可用在里面找到。  
 代码内使用 ArrayList 来承载 BaseResultHandleThread 的 Class 类型，这意味着你可以添加多个 BaseResultHandleThread 的子类，他们的 run 方法都会被执行。例如你既可以将结果写入本地文件，还可以保存到数据库，还可以保存到第三方服务器，等等。
 
-### #3 视频
-[传送门(待填坑) >>>]()
+### #3 视频  
+[01-使用方法](http://www.bilibili.com/video/av8393957/)  
+[02-项目代码](http://www.bilibili.com/video/av8394018/)  
+[03-示例代码](http://www.bilibili.com/video/av8395546/)  
+
+录视频时有点紧张，一些细节可能没有处理好，见谅^_^    
+B 站没有广告，赞一个!  
+
 ### #4 Over
 欢迎提 issue，提 PR。  
