@@ -62,5 +62,6 @@ elasticCore.article();
 录视频时有点紧张，一些细节可能没有处理好，见谅^_^    
 B 站没有广告，赞一个!  
 
-### #4 Over
+### #4 Over  
+版本号的更新遵循“语义化的版本控制”规则，参考：[http://semver.org/](http://semver.org/lang/zh-CN/)  
 欢迎提 issue，提 PR。  
